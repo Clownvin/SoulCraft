@@ -51,7 +51,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
-@Mod(name = SoulCraft.MOD_NAME, modid = SoulCraft.MOD_ID, version = SoulCraft.MOD_VERSION, updateJSON = "https://raw.githubusercontent.com/Clownvin/Living-Enchantment/1.12.2/update.json")
+@Mod(name = SoulCraft.MOD_NAME, modid = SoulCraft.MOD_ID, version = SoulCraft.MOD_VERSION, updateJSON = "https://raw.githubusercontent.com/Clownvin/SoulCraft/1.12.2/update.json")
 @Mod.EventBusSubscriber(modid = SoulCraft.MOD_ID)
 public class SoulCraft {
 
