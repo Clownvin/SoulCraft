@@ -1,0 +1,230 @@
+{
+  "pools": [
+    {
+      "name": "unique_weap_tool_loot",
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "item",
+          "name": "minecraft:wooden_axe",
+          "weight": 4,
+          "functions": [
+            {
+              "function": "soulcraft:give_faint_soul"
+            }
+          ]
+        },
+        {
+          "type": "item",
+          "name": "minecraft:iron_axe",
+          "weight": 2,
+          "functions": [
+            {
+              "function": "soulcraft:give_faint_soul"
+            }
+          ]
+        },
+        {
+          "type": "item",
+          "name": "minecraft:golden_axe",
+          "weight": 1,
+          "functions": [
+            {
+              "function": "soulcraft:give_soul"
+            }
+          ]
+        },
+        {
+          "type": "item",
+          "name": "minecraft:diamond_axe",
+          "weight": 1,
+          "functions": [
+            {
+              "function": "soulcraft:give_soul"
+            }
+          ]
+        },
+        {
+          "type": "item",
+          "name": "minecraft:wooden_pickaxe",
+          "weight": 4,
+          "functions": [
+            {
+              "function": "soulcraft:give_faint_soul"
+            }
+          ]
+        },
+        {
+          "type": "item",
+          "name": "minecraft:iron_pickaxe",
+          "weight": 2,
+          "functions": [
+            {
+              "function": "soulcraft:give_faint_soul"
+            }
+          ]
+        },
+        {
+          "type": "item",
+          "name": "minecraft:golden_pickaxe",
+          "weight": 1,
+          "functions": [
+            {
+              "function": "soulcraft:give_soul"
+            }
+          ]
+        },
+        {
+          "type": "item",
+          "name": "minecraft:diamond_pickaxe",
+          "weight": 1,
+          "functions": [
+            {
+              "function": "soulcraft:give_soul"
+            }
+          ]
+        },
+        {
+          "type": "item",
+          "name": "minecraft:wooden_shovel",
+          "weight": 4,
+          "functions": [
+            {
+              "function": "soulcraft:give_faint_soul"
+            }
+          ]
+        },
+        {
+          "type": "item",
+          "name": "minecraft:iron_shovel",
+          "weight": 2,
+          "functions": [
+            {
+              "function": "soulcraft:give_faint_soul"
+            }
+          ]
+        },
+        {
+          "type": "item",
+          "name": "minecraft:golden_shovel",
+          "weight": 1,
+          "functions": [
+            {
+              "function": "soulcraft:give_soul"
+            }
+          ]
+        },
+        {
+          "type": "item",
+          "name": "minecraft:diamond_shovel",
+          "weight": 1,
+          "functions": [
+            {
+              "function": "soulcraft:give_soul"
+            }
+          ]
+        },
+        {
+          "type": "item",
+          "name": "minecraft:wooden_sword",
+          "weight": 4,
+          "functions": [
+            {
+              "function": "soulcraft:give_faint_soul"
+            }
+          ]
+        },
+        {
+          "type": "item",
+          "name": "minecraft:iron_sword",
+          "weight": 2,
+          "functions": [
+            {
+              "function": "soulcraft:give_faint_soul"
+            }
+          ]
+        },
+        {
+          "type": "item",
+          "name": "minecraft:golden_sword",
+          "weight": 1,
+          "functions": [
+            {
+              "function": "soulcraft:give_soul"
+            }
+          ]
+        },
+        {
+          "type": "item",
+          "name": "minecraft:diamond_sword",
+          "weight": 1,
+          "functions": [
+            {
+              "function": "soulcraft:give_soul"
+            }
+          ]
+        },
+        {
+          "type": "item",
+          "name": "minecraft:wooden_hoe",
+          "weight": 4,
+          "functions": [
+            {
+              "function": "soulcraft:give_faint_soul"
+            }
+          ]
+        },
+        {
+          "type": "item",
+          "name": "minecraft:iron_hoe",
+          "weight": 2,
+          "functions": [
+            {
+              "function": "soulcraft:give_faint_soul"
+            }
+          ]
+        },
+        {
+          "type": "item",
+          "name": "minecraft:golden_hoe",
+          "weight": 1,
+          "functions": [
+            {
+              "function": "soulcraft:give_soul"
+            }
+          ]
+        },
+        {
+          "type": "item",
+          "name": "minecraft:diamond_hoe",
+          "weight": 1,
+          "functions": [
+            {
+              "function": "soulcraft:give_soul"
+            }
+          ]
+        },
+        {
+          "type": "item",
+          "name": "minecraft:bow",
+          "weight": 46,
+          "functions": [
+            {
+              "function": "soulcraft:give_faint_soul"
+            }
+          ]
+        },
+        {
+          "type": "item",
+          "name": "minecraft:bow",
+          "weight": 20,
+          "functions": [
+            {
+              "function": "soulcraft:give_soul"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

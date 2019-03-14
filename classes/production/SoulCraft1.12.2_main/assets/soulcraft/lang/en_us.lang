@@ -1,0 +1,48 @@
+#Enchantment
+enchantment.faint_soul=Faint Soul
+enchantment.soul=Soul
+#Enchantment Descriptions description
+enchantment.livingenchantment.enchantment.living.desc=Gives life to the enchanted item, enabling it to grow stronger with use!
+#Commands
+commands.mainhand_item_no_soul=To use this command, you must have a Living enchanted item held in your main hand.
+commands.invalid_xp_number=XP must be a non-negative number. It can be a decimal number.
+commands.additemxp.usage=/additemxp <xp>
+commands.additemxp.success=Added %f XP to item "%s".
+commands.setitemxp.usage=/setitemxp <xp>
+commands.setitemxp.success=Set the XP of "%s" to %s.
+commands.setitemlevel.usage=/setitemlevel <level>
+commands.setitemlevel.invalid_level_number=Level must be a non-negative whole number less than %s (the max level).
+commands.setitemlevel.success="%s" is now level %s.
+commands.resetitem.usage=/resetitem
+commands.resetitem.success="%s" has been completely reset.
+commands.setpersonality.usage=/setpersonality <personality>
+commands.setpersonality.not_in_range="%s" is not a recognized personality. Specified personality must be the name of the personality.
+commands.setpersonality.success=Changed "%s"'s personality to "%s".
+commands.setpersonality.listpersonalities=List of available personalities: %s
+commands.putitemtosleep.usage=/putitemtosleep
+commands.putitemtosleep.success="%s" is now asleep.
+commands.quietitem.usage=/quietitem
+commands.quietitem.success="%s" is now quieted.
+commands.unquietitem.usage=/unquietitem
+commands.unquietitem.success="%s" is now able to talk again.
+commands.wakeupitem.usage=/wakeupitem
+commands.wakeupitem.success="%s" is now awake.
+#Other text
+tooltip.things_killed=%s Things Killed
+tooltip.blocks_pickaxed=%s Blocks Picked
+tooltip.blocks_axed=%s Blocks Chopped
+tooltip.blocks_shoveled=%s Blocks Shoveled
+tooltip.blocks_hoed=%s Blocks Hoed
+tooltip.blocks_tooled=%s Times Used
+tooltip.hits_taken=%s Hits Taken
+tooltip.personality=Personality: %s
+tooltip.currently_worn=Currently worn:
+tooltip.damage_reduction=%s Damage Reduction
+#Attack Damage as it appears in your minecraft language
+tooltip.attack_damage=Attack Damage
+tooltip.lvl=Lvl: %s
+tooltip.exp=XP: %s
+tooltip.sleeping=Sleeping
+tooltip.quieted=Quieted
+text.new_update_notification=A new %s is available for %s, version %s
+text.soul_gained_strength="%s" has gained new strength!
