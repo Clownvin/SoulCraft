@@ -1,7 +1,7 @@
 package com.clownvin.soulcraft.updatechecker;
 
 import com.clownvin.soulcraft.SoulCraft;
-import com.clownvin.soulcraft.config.SoulCraftConfig;
+import com.clownvin.soulcraft.config.SCConfig;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.common.ForgeVersion;
 import net.minecraftforge.fml.common.Loader;
@@ -33,7 +33,7 @@ public class UpdateChecker {
 
     @SubscribeEvent
     public static void onJoinGame(net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerLoggedInEvent event) {
-        if (!SoulCraftConfig.general.showUpdateNotifications)
+        if (!SCConfig.general.showUpdateNotifications)
             return;
         ForgeVersion.CheckResult result = ForgeVersion.getResult(Loader.instance().activeModContainer());
         int versionDiff;

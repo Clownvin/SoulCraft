@@ -1,7 +1,7 @@
 package com.clownvin.soulcraft.world.storage.loot;
 
 import com.clownvin.soulcraft.SoulCraft;
-import com.clownvin.soulcraft.config.SoulCraftConfig;
+import com.clownvin.soulcraft.config.SCConfig;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.storage.loot.LootEntry;
 import net.minecraft.world.storage.loot.LootEntryTable;
@@ -29,11 +29,11 @@ public class LootInjector {
         LootEntry empty;
         LootEntry[] loot;
         ResourceLocation emptyLocation = new ResourceLocation(SoulCraft.MOD_ID + ":inject/empty");
-        if (type == SoulCraftConfig.JUST_BOOKS) {
+        if (type == SCConfig.JUST_BOOKS) {
             empty = new LootEntryTable(emptyLocation, weight - 1, 0, new LootCondition[]{}, "empty");
             loot = new LootEntry[]{books, empty};
         } else { //Armor
-            if (type == SoulCraftConfig.JUST_UNIQUES) {
+            if (type == SCConfig.JUST_UNIQUES) {
                 empty = new LootEntryTable(emptyLocation, (weight - 1) * 2, 0, new LootCondition[]{}, "empty");
                 loot = new LootEntry[]{armor, uniques, empty};
             } else {
@@ -46,11 +46,11 @@ public class LootInjector {
 
     @SubscribeEvent
     public static void loadLootEvent(LootTableLoadEvent event) {
-        if (SoulCraftConfig.loot.fishingLoot && event.getName().toString().equals("minecraft:gameplay/fishing")) {
-            LootPool pool = new LootPool(createLoot(SoulCraftConfig.loot.fishingLootType, SoulCraftConfig.loot.fishingLootChance), new LootCondition[]{}, new RandomValueRange(1, 1), new RandomValueRange(0, 0), "soulcraft_fishing_loot");
+        if (SCConfig.loot.fishingLoot && event.getName().toString().equals("minecraft:gameplay/fishing")) {
+            LootPool pool = new LootPool(createLoot(SCConfig.loot.fishingLootType, SCConfig.loot.fishingLootChance), new LootCondition[]{}, new RandomValueRange(1, 1), new RandomValueRange(0, 0), "soulcraft_fishing_loot");
             event.getTable().addPool(pool);
-        } else if (SoulCraftConfig.loot.chestLoot && event.getName().toString().contains("chests/")) {
-            LootPool pool = new LootPool(createLoot(SoulCraftConfig.loot.chestLootType, SoulCraftConfig.loot.chestLootChance), new LootCondition[]{}, new RandomValueRange(1, 2), new RandomValueRange(0, 6), "soulcraft_chest_loot");
+        } else if (SCConfig.loot.chestLoot && event.getName().toString().contains("chests/")) {
+            LootPool pool = new LootPool(createLoot(SCConfig.loot.chestLootType, SCConfig.loot.chestLootChance), new LootCondition[]{}, new RandomValueRange(1, 2), new RandomValueRange(0, 6), "soulcraft_chest_loot");
             event.getTable().addPool(pool);
         }
     }

@@ -1,14 +1,13 @@
 package com.clownvin.soulcraft.entity.item;
 
 import com.clownvin.soulcraft.SoulCraft;
-import com.clownvin.soulcraft.config.SoulCraftConfig;
+import com.clownvin.soulcraft.config.SCConfig;
 import com.clownvin.soulcraft.soul.ISoul;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.MoverType;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.SoundEvents;
-import net.minecraft.item.ItemBow;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
@@ -60,12 +59,6 @@ public class EntitySoulXPOrb extends Entity {
         this.motionZ = (0.5 - Math.random()) * 0.66;
         this.xpValue = expValue;
         this.xpColor = (int) (Math.random() * 255);
-        float xpSplit = getXPSplit((float) expValue);
-        if (this.xpValue > xpSplit) {
-            world.spawnEntity(new EntitySoulXPOrb(world, x, y, z, xpSplit));
-            this.xpValue -= xpSplit;
-            //player.world.spawnEntity(new EntitySoulXPOrb(player.world, (double) event.getEntityLiving().getPosition().getX() + 0.5D, (double) event.getEntityLiving().getPosition().getY() + 0.5D, (double) event.getEntityLiving().getPosition().getZ() + 0.5D, (float) SoulCraftConfig.getXPForLiving((EntityLiving) event.getEntityLiving())));
-        }
     }
 
     public EntitySoulXPOrb(World worldIn) {
@@ -106,25 +99,17 @@ public class EntitySoulXPOrb extends Entity {
 
     @Override
     public void onCollideWithPlayer(EntityPlayer player) {
-        if (player.world.isRemote || this.delayBeforeCanPickup != 0 || player.xpCooldown != 0) {
+        if (player.world.isRemote || this.delayBeforeCanPickup != 0 || player.xpCooldown != 0 || player.getItemInUseCount() > 0) {
             return;
         }
-        if ((player.getHeldItemMainhand().getItem() instanceof ItemBow || player.getHeldItemOffhand().getItem() instanceof ItemBow) && player.getItemInUseCount() > 0) {
-            return;
-        }
-        List<ItemStack> items = SoulCraft.getAllEquipedSoulItems(player);
+        List<ItemStack> items = SoulCraft.getAllEquippedSoulItems(player);
         if (items.isEmpty())
             return;
-        ItemStack stack = items.get((int) (Math.random() * items.size()));
-        ISoul soul = ISoul.getSoul(stack);
         player.xpCooldown = 1;
         player.onItemPickup(this, 1);
-        if (SoulCraftConfig.general.xpShare)
-            SoulCraft.addExp(player, this.xpValue);
-        else
-            SoulCraft.addExp(player, stack, soul, this.xpValue);
+        SoulCraft.addXP(player, xpValue);
         this.setDead();
-        player.world.playSound(null, player.posX, player.posY, player.posZ, SoundEvents.ENTITY_PLAYER_LEVELUP, player.getSoundCategory(), (float) SoulCraftConfig.general.xpVolume, 0.2F + (float) (Math.random() * 0.3F));
+        player.world.playSound(null, player.posX, player.posY, player.posZ, SoundEvents.ENTITY_PLAYER_LEVELUP, player.getSoundCategory(), (float) SCConfig.general.xpVolume, 0.2F + (float) (Math.random() * 0.3F));
     }
 
     @Override
@@ -182,7 +167,7 @@ public class EntitySoulXPOrb extends Entity {
             this.xpTargetColor = this.xpColor;
         }
 
-        if (this.closestPlayer != null && (this.closestPlayer.isSpectator() || SoulCraft.getAllEquipedSoulItems(this.closestPlayer).isEmpty())) {
+        if (this.closestPlayer != null && (this.closestPlayer.isSpectator() || SoulCraft.getAllEquippedSoulItems(this.closestPlayer).isEmpty())) {
             this.closestPlayer = null;
         }
 

@@ -1,8 +1,11 @@
 package com.clownvin.soulcraft.soul;
 
 import com.clownvin.soulcraft.SoulCraft;
-import com.clownvin.soulcraft.config.SoulCraftConfig;
+import com.clownvin.soulcraft.config.SCConfig;
 import com.clownvin.soulcraft.personality.Personality;
+import net.minecraft.entity.monster.EntityMob;
+import net.minecraft.entity.passive.EntityAnimal;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
@@ -13,13 +16,12 @@ import net.minecraftforge.common.capabilities.ICapabilitySerializable;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public interface ISoul extends ICapabilitySerializable<NBTTagCompound> {
+public interface ISoul {
 
     String PERSONALITY_NAME = "personalityName";
     String KILL_COUNT = "kills";
     String HIT_COUNT = "hits";
     String USAGE_COUNT = "uses";
-    String EXISTS = "exists";
     String STRENGTH = "strength";
     String LAST_TALK = "last_talk";
     String XP = "xp";
@@ -29,76 +31,28 @@ public interface ISoul extends ICapabilitySerializable<NBTTagCompound> {
     int FAINT = 0; //Just talks
     int STRONG = 1; //Can grow stronger (level up)
 
-    class Storage implements Capability.IStorage<ISoul> {
-        @Nullable
-        @Override
-        public NBTTagCompound writeNBT(Capability<ISoul> capability, ISoul instance, EnumFacing side) {
-            NBTTagCompound base = new NBTTagCompound();
-            base.setBoolean(EXISTS, instance.doesExist());
-            if (!instance.doesExist())
-                return base;
-            base.setBoolean(ASLEEP, instance.isAsleep());
-            base.setBoolean(QUIETED, instance.isQuieted());
-            base.setString(PERSONALITY_NAME, instance.getPersonalityName());
-            base.setInteger(KILL_COUNT, instance.getKillCount());
-            base.setInteger(HIT_COUNT, instance.getHitCount());
-            base.setInteger(USAGE_COUNT, instance.getUseCount());
-            base.setInteger(STRENGTH, instance.getStrength());
-            if (instance.getStrength() <= FAINT)
-                return base;
-            base.setDouble(XP, instance.getXP());
-            return base;
+    static ISoul getSoul(Object object) {
+        if (object instanceof EntityAnimal) {
+            return ((EntityAnimal) object).getCapability(SoulCraft.ANIMAL_SOUL_CAPABILITY, null);
         }
-
-        @Override
-        public void readNBT(Capability<ISoul> capability, ISoul instance, EnumFacing side, NBTBase nbt) {
-            NBTTagCompound compound = (NBTTagCompound) nbt;
-            instance.setExists(compound.getBoolean(EXISTS));
-            if (!instance.doesExist())
-                return;
-            instance.setSleeping(compound.getBoolean(ASLEEP));
-            instance.setQuieted(compound.getBoolean(QUIETED));
-            instance.setPersonalityName(compound.getString(PERSONALITY_NAME));
-            instance.setKillCount(compound.getInteger(KILL_COUNT));
-            instance.setHitCount(compound.getInteger(HIT_COUNT));
-            instance.setUseCount(compound.getInteger(USAGE_COUNT));
-            instance.setStrength(compound.getInteger(STRENGTH));
-            if (instance.getStrength() <= FAINT)
-                return;
-            instance.setXP(compound.getDouble(XP));
+        if (object instanceof EntityPlayer) {
+            return ((EntityPlayer) object).getCapability(SoulCraft.PLAYER_SOUL_CAPABILITY, null);
         }
-    }
-
-    @Override
-    default boolean hasCapability(@Nonnull Capability<?> capability, @Nullable EnumFacing facing) {
-        return capability == SoulCraft.SOUL_CAPABILITY;
-    }
-
-    @Nullable
-    @Override
-    default <T> T getCapability(@Nonnull Capability<T> capability, @Nullable EnumFacing facing) {
-        return hasCapability(capability, facing) ? (T) this : null;
-    }
-
-    @Override
-    default NBTTagCompound serializeNBT() {
-        return (NBTTagCompound) SoulCraft.SOUL_CAPABILITY.getStorage().writeNBT(SoulCraft.SOUL_CAPABILITY, this, null);
-    }
-
-    @Override
-    default void deserializeNBT(NBTTagCompound nbt) {
-        SoulCraft.SOUL_CAPABILITY.getStorage().readNBT(SoulCraft.SOUL_CAPABILITY, this, null, nbt);
-    }
-
-    static ISoul getSoul(ItemStack item) {
-        if (item.hasCapability(SoulCraft.SOUL_CAPABILITY, null)) {
-            return item.getCapability(SoulCraft.SOUL_CAPABILITY, null);
+        if (object instanceof EntityMob) {
+            return ((EntityMob) object).getCapability(SoulCraft.MOB_SOUL_CAPABILITY, null);
         }
-        NBTTagCompound tag = SoulCraft.getSoulEnchantNBT(item);
-        if (tag == null) {
-            return null;
+        if (object instanceof ItemStack) {
+            ItemStack item = (ItemStack) object;
+            if (item.hasCapability(SoulCraft.ITEM_SOUL_CAPABILITY, null)) {
+                return item.getCapability(SoulCraft.ITEM_SOUL_CAPABILITY, null);
+            }
+            NBTTagCompound tag = SoulCraft.getSoulEnchantNBT(item);
+            if (tag == null) {
+                return null;
+            }
+            return new EnchantmentWrapper(tag);
         }
-        return new EnchantmentWrapper(tag);
+        return null;
     }
 
     default Personality getPersonality() {
@@ -111,7 +65,7 @@ public interface ISoul extends ICapabilitySerializable<NBTTagCompound> {
     }
 
     default boolean isMaxLevel() {
-        return getLevel() == SoulCraftConfig.general.maxLevel;
+        return getLevel() == SCConfig.general.maxLevel;
     }
 
     boolean isAsleep();
@@ -122,10 +76,7 @@ public interface ISoul extends ICapabilitySerializable<NBTTagCompound> {
 
     void setQuieted(boolean quieted);
 
-    boolean doesExist();
-
-    default void destroySoul() {
-        setExists(false);
+    default void resetSoul() {
         setSleeping(false);
         setQuieted(false);
         setPersonalityName("???");
@@ -137,9 +88,6 @@ public interface ISoul extends ICapabilitySerializable<NBTTagCompound> {
     }
 
     default void copySoul(ISoul other) {
-        setExists(other.doesExist());
-        if (!doesExist())
-            return;
         setPersonalityName(other.getPersonalityName());
         setKillCount(other.getKillCount());
         setUseCount(other.getUseCount());
@@ -150,8 +98,6 @@ public interface ISoul extends ICapabilitySerializable<NBTTagCompound> {
         if (getStrength() > FAINT)
             setXP(other.getXP());
     }
-
-    void setExists(boolean exists);
 
     default void createSoul() {
         createSoul(0);
@@ -166,7 +112,6 @@ public interface ISoul extends ICapabilitySerializable<NBTTagCompound> {
     }
 
     default void createSoul(int startingStrength, String personalityName) {
-        setExists(true);
         setStrength(startingStrength);
         setPersonalityName(personalityName);
     }
@@ -177,22 +122,22 @@ public interface ISoul extends ICapabilitySerializable<NBTTagCompound> {
 
     void setXP(double newXP);
 
-    static double xpRequiredForLevel(int lvl) {
-        if (SoulCraftConfig.general.xpFunction == 1)
-            return (Math.round((4 * (Math.pow(lvl - 1, 3)) / 5)) * SoulCraftConfig.general.levelExpModifier);
-        return ((9 * (lvl * lvl) - (4 * lvl)) * SoulCraftConfig.general.levelExpModifier);
+    static double xpRequiredForLevel(int lvl, double xpMod) {
+        if (SCConfig.general.xpFunction == 1)
+            return (Math.round((4 * (Math.pow(lvl - 1, 3)) / 5)) * xpMod);
+        return ((9 * (lvl * lvl) - (4 * lvl)) * xpMod);
     }
 
-    default float getToolEffectivenessModifier() {
-        return 1 + (float) (getLevel() * SoulCraftConfig.general.toolEffectivenessPerLevel);
+    default double getBreakSpeedModifier() {
+        return getLevel() * getToolEffectivenessMod();
     }
 
-    default float getWeaponEffectivenessModifier() {
-        return 1 + (float) (getLevel() * SoulCraftConfig.general.weaponEffectivenessPerLevel);
+    default double getOutgoingDamageModifier() {
+        return getLevel() * getWeaponEffectivenessMod();
     }
 
-    static float getArmorEffectivenessModifier(int level, float scale) {
-        return 1 + (float) (level * SoulCraftConfig.general.armorEffectivenessPerLEvel * scale);
+    default double getIncommingDamageModifier() {
+        return getLevel() * getArmorEffectivenessMod();
     }
 
     default int getLevel() {
@@ -200,12 +145,20 @@ public interface ISoul extends ICapabilitySerializable<NBTTagCompound> {
             return 0;
         }
         int level;
-        if (SoulCraftConfig.general.xpFunction == 1)
-            level = (int) Math.pow((5 * (getXP() / SoulCraftConfig.general.levelExpModifier)) / 4, 1 / 3.0f) + 1;
+        if (SCConfig.general.xpFunction == 1)
+            level = (int) Math.pow((5 * (getXP() / getLevelXPMod())) / 4, 1 / 3.0f) + 1;
         else
-            level = (int) ((Math.sqrt((9 * (getXP() / SoulCraftConfig.general.levelExpModifier)) + 4) + 2) / 9.0);
-        return Math.min(level, SoulCraftConfig.general.maxLevel);
+            level = (int) ((Math.sqrt((9 * (getXP() / getLevelXPMod())) + 4) + 2) / 9.0);
+        return Math.min(level, SCConfig.general.maxLevel);
     }
+
+    double getLevelXPMod();
+
+    double getToolEffectivenessMod();
+
+    double getWeaponEffectivenessMod();
+
+    double getArmorEffectivenessMod();
 
     String getPersonalityName();
 

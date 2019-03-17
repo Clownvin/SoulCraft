@@ -1,7 +1,7 @@
 package com.clownvin.soulcraft.enchantment;
 
 import com.clownvin.soulcraft.SoulCraft;
-import com.clownvin.soulcraft.config.SoulCraftConfig;
+import com.clownvin.soulcraft.config.SCConfig;
 import net.minecraft.enchantment.*;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.*;
@@ -53,7 +53,7 @@ public abstract class AbstractEnchantmentSoul extends Enchantment {
             return true;
         if (ench instanceof EnchantmentSoul) //Cannot have multiple souls, lol...
             return false;
-        if (SoulCraftConfig.general.allowDamageEnchantments)
+        if (SCConfig.general.allowDamageEnchantments)
             return true;
         if (ench instanceof EnchantmentArrowDamage || ench instanceof EnchantmentDamage || ench instanceof EnchantmentDigging || ench instanceof EnchantmentProtection)
             return false;

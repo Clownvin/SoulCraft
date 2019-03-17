@@ -1,5 +1,7 @@
 package com.clownvin.soulcraft.personality;
 
+import com.google.gson.Gson;
+
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -15,7 +17,7 @@ public class PersonalityLoader {
         createBasePersonalities();
         File[] personalityConfigs = personalityLocation.listFiles();
         for (File personalityConfig : personalityConfigs) {
-            if (!personalityConfig.getName().endsWith(".cfg"))
+            if (!personalityConfig.getName().endsWith(".json"))
                 continue;
             personalities.add(loadPersonality(personalityConfig));
         }
@@ -24,7 +26,7 @@ public class PersonalityLoader {
     }
 
     public static void createPersonalityFile(Personality p) {
-        File file = new File("./config/personalities/" + p.name + ".cfg");
+        File file = new File("./config/personalities/" + p.name + ".json");
         if (file.exists())
             return;
         try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8))) {

@@ -1,13 +1,12 @@
 package com.clownvin.soulcraft;
 
-import com.clownvin.soulcraft.config.SoulCraftConfig;
+import com.clownvin.soulcraft.config.SCConfig;
 import com.clownvin.soulcraft.enchantment.EnchantmentFaintSoul;
 import com.clownvin.soulcraft.enchantment.EnchantmentSoul;
 import com.clownvin.soulcraft.entity.item.EntitySoulXPOrb;
 import com.clownvin.soulcraft.personality.Personality;
 import com.clownvin.soulcraft.proxy.CommonProxy;
-import com.clownvin.soulcraft.soul.ISoul;
-import com.clownvin.soulcraft.soul.Soul;
+import com.clownvin.soulcraft.soul.*;
 import com.clownvin.soulcraft.world.storage.loot.LootInjector;
 import com.clownvin.soulcraft.world.storage.loot.functions.GiveFaintSoul;
 import com.clownvin.soulcraft.world.storage.loot.functions.GiveSoul;
@@ -16,7 +15,6 @@ import com.clownvin.soulcraft.command.*;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
@@ -56,12 +54,24 @@ import java.util.function.Predicate;
 public class SoulCraft {
 
     public static final String MOD_ID = "soulcraft";
-    public static final String MOD_VERSION = "1.0.0";
+    public static final String MOD_VERSION = "2.0.0";
     public static final String MOD_NAME = "SoulCraft";
 
-    @CapabilityInject(ISoul.class)
-    public static final Capability<ISoul> SOUL_CAPABILITY = null;
-    public static final ResourceLocation SOUL_RESOURCE_LOCATION = new ResourceLocation(MOD_ID, "soul_capability");
+    @CapabilityInject(ItemSoul.class)
+    public static final Capability<ItemSoul> ITEM_SOUL_CAPABILITY = null;
+    public static final ResourceLocation ITEM_SOUL_RESOURCE_LOCATION = new ResourceLocation(MOD_ID, "item_soul_capability");
+
+    @CapabilityInject(MobSoul.class)
+    public static final Capability<MobSoul> MOB_SOUL_CAPABILITY = null;
+    public static final ResourceLocation MOB_SOUL_RESOURCE_LOCATION = new ResourceLocation(MOD_ID, "mob_soul_capability");
+
+    @CapabilityInject(AnimalSoul.class)
+    public static final Capability<AnimalSoul> ANIMAL_SOUL_CAPABILITY = null;
+    public static final ResourceLocation ANIMAL_SOUL_RESOURCE_LOCATION = new ResourceLocation(MOD_ID, "animal_soul_capability");
+
+    @CapabilityInject(PlayerSoul.class)
+    public static final Capability<PlayerSoul> PLAYER_SOUL_CAPABILITY = null;
+    public static final ResourceLocation PLAYER_SOUL_RESOURCE_LOCATION = new ResourceLocation(MOD_ID, "player_soul_capability");
 
     public static EnchantmentFaintSoul FAINT_SOUL_ENCHANTMENT;
     public static EnchantmentSoul SOUL_ENCHANTMENT;
@@ -72,25 +82,177 @@ public class SoulCraft {
     @SidedProxy(clientSide = "com.clownvin.soulcraft.proxy.ClientProxy", serverSide = "com.clownvin.soulcraft.proxy.ServerProxy")
     public static CommonProxy proxy;
 
-    public static int getArmorsCumulativeSoulLevel(EntityLivingBase entity) {
-        int cumulativeLivingLevel = 0;
-        List<ItemStack> gear = getAllEquipedSoulItems(entity, (soul) -> soul.doesExist() && !soul.isAsleep() && soul.getStrength() > ISoul.FAINT);
-        for (ItemStack stack : gear) {
-            if (!(stack.getItem() instanceof ItemArmor))
-                continue;
-            cumulativeLivingLevel += ISoul.getSoul(stack).getLevel();
+    public static double getOutgoingDamageModifiers(Entity entity) {
+        double cumulativeModifiers = 0.0D;
+        ISoul soul = ISoul.getSoul(entity);
+        if (soul != null) {
+            cumulativeModifiers += soul.getOutgoingDamageModifier();
         }
-        return cumulativeLivingLevel;
+        if (entity instanceof EntityLivingBase) {
+            soul = ISoul.getSoul(((EntityLivingBase) entity).getHeldItemMainhand());
+            if (soul != null && !soul.isAsleep()) {
+                cumulativeModifiers += soul.getOutgoingDamageModifier();
+            }
+        }
+        return cumulativeModifiers + 1.0D;
     }
 
-    public static void addHitCount(EntityLivingBase entity) {
-        List<ItemStack> gear = getAllEquipedSoulItems(entity);
+    public static double getBreakSpeedModifiers(Entity entity) {
+        double cumulativeModifiers = 0.0D;
+        ISoul soul = ISoul.getSoul(entity);
+        if (soul != null) {
+            cumulativeModifiers += soul.getBreakSpeedModifier();
+        }
+        if (entity instanceof EntityLivingBase) {
+            soul = ISoul.getSoul(((EntityLivingBase) entity).getHeldItemMainhand());
+            if (soul != null && !soul.isAsleep()) {
+                cumulativeModifiers += soul.getBreakSpeedModifier();
+            }
+        }
+        return cumulativeModifiers + 1.0D;
+    }
+
+    public static double getIncomingDamageModifiers(Entity entity) {
+        double cumulativeModifiers = 0.0D;
+        ISoul soul = ISoul.getSoul(entity);
+        if (soul != null) {
+            cumulativeModifiers += soul.getIncommingDamageModifier();
+        }
+        if (!(entity instanceof EntityLivingBase)) {
+            return cumulativeModifiers + 1.0D;
+        }
+        List<ItemStack> equippedItemsWithSouls = getAllEquippedSoulItems((EntityLivingBase) entity, (s) -> !s.isAsleep() && s.getStrength() > ISoul.FAINT);
+        if (!equippedItemsWithSouls.isEmpty()) {
+            double armorModifiers = 0.0D;
+            for (ItemStack item : equippedItemsWithSouls) {
+                if (!(item.getItem() instanceof ItemArmor))
+                    continue;
+                armorModifiers += ISoul.getSoul(item).getIncommingDamageModifier();
+            }
+            cumulativeModifiers += armorModifiers / 4.0D;
+        }
+        return cumulativeModifiers + 1.0D;
+    }
+
+    public static void addHitCount(Entity entity) {
+        ISoul entitySoul = ISoul.getSoul(entity);
+        if (entitySoul != null) {
+            entitySoul.setHitCount(entitySoul.getHitCount() + 1);
+        }
+        if (!(entity instanceof EntityLivingBase)) {
+            return;
+        }
+        List<ItemStack> gear = getAllEquippedSoulItems((EntityLivingBase) entity);
         for (ItemStack stack : gear) {
             if (!(stack.getItem() instanceof ItemArmor))
                 continue;
             ISoul soul = ISoul.getSoul(stack);
             soul.setHitCount(soul.getHitCount() + 1);
         }
+    }
+
+    public static void addKillCount(Entity entity) {
+        ISoul entitySoul = ISoul.getSoul(entity);
+        if (entitySoul != null) {
+            entitySoul.setKillCount(entitySoul.getKillCount() + 1);
+        }
+        if (!(entity instanceof EntityLivingBase)) {
+            return;
+        }
+        List<ItemStack> gear = getAllEquippedSoulItems((EntityLivingBase) entity);
+        for (ItemStack stack : gear) {
+            if (!(stack.getItem() instanceof ItemArmor))
+                continue;
+            ISoul soul = ISoul.getSoul(stack);
+            soul.setKillCount(soul.getKillCount() + 1);
+        }
+    }
+
+    public static void addUseCount(Entity entity) {
+        ISoul entitySoul = ISoul.getSoul(entity);
+        if (entitySoul != null) {
+            entitySoul.setUseCount(entitySoul.getUseCount() + 1);
+        }
+        if (!(entity instanceof EntityLivingBase)) {
+            return;
+        }
+        List<ItemStack> gear = getAllEquippedSoulItems((EntityLivingBase) entity);
+        for (ItemStack stack : gear) {
+            if (!(stack.getItem() instanceof ItemArmor))
+                continue;
+            ISoul soul = ISoul.getSoul(stack);
+            soul.setUseCount(soul.getUseCount() + 1);
+        }
+    }
+
+    public static double addXP(Entity entity, final double xp) {
+        ISoul soul = ISoul.getSoul(entity);
+        boolean soulExists = soul != null;
+        boolean sharingWithItems = false;
+        if (entity instanceof EntityLivingBase) {
+            List<ItemStack> gear = getAllEquippedSoulItems((EntityLivingBase) entity);
+            if (!gear.isEmpty()) {
+                if (SCConfig.general.xpShare) {
+                    double share = (soulExists ? xp / 2.0D : xp) / gear.size();
+                    gear.forEach((item) -> addXPToItem((EntityLivingBase) entity, item, ISoul.getSoul(item), share));
+                } else {
+                    ItemStack item = gear.get((int) (Math.random() * gear.size()));
+                    addXPToItem((EntityLivingBase) entity, item, ISoul.getSoul(item), (soulExists ? xp / 2.0D : xp));
+                }
+                if (!soulExists) {
+                    return xp;
+                }
+                sharingWithItems = true;
+            }
+        }
+        if (soulExists) {
+            addXPToEntity(entity, soul, sharingWithItems ? xp / 2.0D : xp);
+            return xp;
+        } else {
+            return 0;
+        }
+    }
+
+    public static void addXPToEntity(Entity entity, ISoul soul, double xp) {
+        boolean levelUp = addXPToSoul(soul, xp);
+        if (!levelUp || !(entity instanceof EntityPlayer))
+            return;
+        entity.world.playSound((EntityPlayer) entity, entity.posX, entity.posY, entity.posZ, SoundEvents.ENTITY_PLAYER_LEVELUP, entity.getSoundCategory(), 0.75F, 0.9F + (float) (Math.random() * 0.2F));
+        if (!(entity instanceof EntityPlayer)) {
+            return;
+        }
+        entity.sendMessage(new TextComponentTranslation("text.soul_levelup", soul.getLevel()));
+    }
+
+    public static void addXPToItem(EntityLivingBase owner, ItemStack item, ISoul soul, double xp) {
+        addXPToItem(owner, item, soul, xp, false);
+    }
+
+    public static void addXPToItem(EntityLivingBase owner, ItemStack item, ISoul soul, double xp, boolean ignoreStrengthCheck) {
+        if (soul.getStrength() == ISoul.FAINT) {
+            if (ignoreStrengthCheck) {
+                soul.setStrength(ISoul.STRONG);
+            }else if ((Math.random() * SCConfig.souls.items.xpCheck) < xp) {
+                soul.setStrength(ISoul.STRONG);
+                owner.sendMessage(new TextComponentTranslation("text.soul_gained_strength", item.getDisplayName()));
+            } else {
+                return;
+            }
+        }
+        boolean levelUp = addXPToSoul(soul, xp);
+        if (!levelUp || !(owner instanceof EntityPlayer))
+            return;
+        Personality personality = soul.getPersonality();
+        owner.world.playSound((EntityPlayer) owner, owner.posX, owner.posY, owner.posZ, SoundEvents.ENTITY_PLAYER_LEVELUP, owner.getSoundCategory(), 0.75F, 0.9F + (float) (Math.random() * 0.2F));
+        if (SCConfig.personalities.showDialogue)
+            talk((EntityPlayer) owner, item, soul, personality.getOnLevelUp(), 0);
+    }
+
+    public static boolean addXPToSoul(ISoul soul, double xp) {
+        int oldLevel = soul.getLevel();
+        soul.addXP(xp);
+        int newLevel = soul.getLevel();
+        return newLevel > oldLevel;
     }
 
     public static String removeFormatting(String textIn) {
@@ -115,7 +277,7 @@ public class SoulCraft {
     }
 
     public static void doTalking(EntityPlayer player, ItemStack item, ISoul soul, Event reason) {
-        if (!SoulCraftConfig.personalities.showDialogue || soul.isQuieted() || soul.isAsleep())
+        if (!SCConfig.personalities.showDialogue || soul == null || soul.isQuieted() || soul.isAsleep())
             return;
         Personality personality = soul.getPersonality();
         float damagePercent = item.getItemDamage() / (float) item.getMaxDamage();
@@ -140,11 +302,11 @@ public class SoulCraft {
     }
 
     public static void talk(EntityPlayer player, ItemStack stack, ISoul soul, String message) {
-        talk(player, stack, soul, message, SoulCraftConfig.personalities.minimumDialogueDelay);
+        talk(player, stack, soul, message, SCConfig.personalities.minimumDialogueDelay);
     }
 
     public static void talk(EntityPlayer player, ItemStack stack, ISoul soul, String message, int minimumDialogueDelay) {
-        if (!SoulCraftConfig.personalities.showDialogue) {
+        if (!SCConfig.personalities.showDialogue) {
             return;
         }
         if (System.currentTimeMillis() - soul.getLastTalk() < minimumDialogueDelay) {
@@ -163,14 +325,14 @@ public class SoulCraft {
         if (soul == null) {
             return; // It's not enchanted..
         }
-        soul.destroySoul();
+        soul.resetSoul();
     }
 
-    public static List<ItemStack> getAllEquipedSoulItems(EntityLivingBase entity) {
-        return getAllEquipedSoulItems(entity, (soul) -> soul.doesExist() && !soul.isAsleep());
+    public static List<ItemStack> getAllEquippedSoulItems(EntityLivingBase entity) {
+        return getAllEquippedSoulItems(entity, (soul) -> !soul.isAsleep());
     }
 
-    public static List<ItemStack> getAllEquipedSoulItems(EntityLivingBase entity, Predicate<ISoul> filter) {
+    public static List<ItemStack> getAllEquippedSoulItems(EntityLivingBase entity, Predicate<ISoul> filter) {
         List<ItemStack> items = new ArrayList<>(6);
         for (ItemStack i : entity.getEquipmentAndArmor()) {
             ISoul soul;
@@ -180,57 +342,41 @@ public class SoulCraft {
         return items;
     }
 
+    public static ItemStack getRandomEquippedSoulItem(EntityLivingBase entity) {
+        return getRandomEquippedSoulItem(entity, (soul) -> !soul.isAsleep());
+    }
+
+    public static ItemStack getRandomEquippedSoulItem(EntityLivingBase entity, Predicate<ISoul> filter) {
+        List<ItemStack> items = getAllEquippedSoulItems(entity, filter);
+        if (items.isEmpty()) {
+            return null;
+        }
+        return items.get((int) (Math.random() * items.size()));
+    }
+
     public static boolean isToolEffective(ItemStack item, IBlockState state) {
         return item.getItem().getToolClasses(item).contains(state.getBlock().getHarvestTool(state));
     }
 
-    public static void doExpDrop(EntityPlayer player, BlockPos pos, double exp) {
-        if (SoulCraftConfig.general.xpStyle == 0)
-            return;
-        if (SoulCraftConfig.general.xpStyle == 2) {
-            player.world.spawnEntity(new EntitySoulXPOrb(player.world, pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D, exp));
-        } else if (SoulCraftConfig.general.xpStyle == 1) {
-            if (SoulCraftConfig.general.xpShare)
-                addExp(player, exp);
-            else {
-                List<ItemStack> items = getAllEquipedSoulItems(player);
-                ItemStack item = items.get((int) (Math.random() * items.size()));
-                addExp(player, item, ISoul.getSoul(item), exp);
+    public static void doExpDrop(Entity entity, BlockPos pos, double exp) {
+        if (entity instanceof EntityPlayer && SCConfig.general.xpStyle == 2) {
+            double x = pos.getX() + 0.5D;
+            double y = pos.getY() + 0.5D;
+            double z = pos.getZ() + 0.5D;
+            float xpSplit;
+            while (exp > (xpSplit = EntitySoulXPOrb.getXPSplit((float) exp))) {
+                entity.world.spawnEntity(new EntitySoulXPOrb(entity.world, x, y, z, xpSplit));
+                exp -= xpSplit;
             }
+            entity.world.spawnEntity(new EntitySoulXPOrb(entity.world, x, y, z, exp));
+        } else if (SCConfig.general.xpStyle != 0) {
+            addXP(entity, exp);
         }
-    }
-
-    public static void addExp(EntityPlayer player, double exp) { //Adds EXP to all
-        List<ItemStack> items = getAllEquipedSoulItems(player);
-        for (ItemStack stack : items) {
-            addExp(player, stack, ISoul.getSoul(stack), exp / items.size());
-        }
-    }
-
-    public static void addExp(EntityPlayer player, ItemStack stack, ISoul soul, double exp) {
-        //System.out.println(stack.getTagCompound());
-        if (soul.getStrength() == ISoul.FAINT) {
-            if ((Math.random() * 1000) < exp) {
-                soul.setStrength(ISoul.STRONG);
-                player.sendMessage(new TextComponentTranslation("text.soul_gained_strength", stack.getDisplayName()));
-            } else {
-                return;
-            }
-        }
-        int currLevel = soul.getLevel();
-        soul.addXP(exp);
-        int newLevel = soul.getLevel();
-        if (newLevel == currLevel)
-            return;
-        Personality personality = soul.getPersonality();
-        player.world.playSound(player, player.posX, player.posY, player.posZ, SoundEvents.ENTITY_PLAYER_LEVELUP, player.getSoundCategory(), 0.75F, 0.9F + (float) (Math.random() * 0.2F));
-        if (SoulCraftConfig.personalities.showDialogue)
-            talk(player, stack, soul, personality.getOnLevelUp(), 0);
     }
 
     public static void setExp(EntityPlayer player, ItemStack stack, ISoul soul, double exp) {
         soul.setXP(0);
-        addExp(player, stack, soul, exp);
+        addXPToItem(player, stack, soul, exp, true);
     }
 
     @EventHandler
@@ -244,6 +390,7 @@ public class SoulCraft {
         event.registerServerCommand(new CommandQuietItem());
         event.registerServerCommand(new CommandUnquietItem());
         event.registerServerCommand(new CommandWakeupItem());
+        event.registerServerCommand(new CommandMySoul());
     }
 
     @EventHandler
@@ -276,7 +423,7 @@ public class SoulCraft {
                         "Herobrine ($durability durability remaining)",
                 });
         if (Loader.isModLoaded("enderio")) {
-            SoulCraftConfig.createEnderIOEnchantRecipe();
+            SCConfig.createEnderIOEnchantRecipe();
         }
         proxy.preInit(event);
     }

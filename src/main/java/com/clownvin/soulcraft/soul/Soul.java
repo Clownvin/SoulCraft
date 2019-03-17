@@ -1,56 +1,12 @@
 package com.clownvin.soulcraft.soul;
 
-public class Soul implements ISoul {
-
-    public Soul() {
-
-    }
+public abstract class Soul implements ISoul {
 
     protected String personalityName = "???";
     protected int killCount;
     protected int hitCount;
     protected int useCount;
-    protected int strength;
-    protected long lastTalk;
     protected double xp;
-    protected boolean exists = false;
-    protected boolean asleep = false;
-    protected boolean quieted = false;
-
-    @Override
-    public boolean isAsleep() {
-        return asleep;
-    }
-
-    @Override
-    public void setSleeping(boolean sleeping) {
-        asleep = sleeping;
-    }
-
-    @Override
-    public boolean isQuieted() {
-        return quieted;
-    }
-
-    @Override
-    public void setQuieted(boolean quieted) {
-        this.quieted = quieted;
-    }
-
-    @Override
-    public boolean doesExist() {
-        return exists;
-    }
-
-    @Override
-    public void setExists(boolean exists) {
-        this.exists = true;
-    }
-
-    @Override
-    public void createSoul(int startingStrength) {
-        this.exists = true;
-    }
 
     @Override
     public double getXP() {
@@ -59,12 +15,12 @@ public class Soul implements ISoul {
 
     @Override
     public void addXP(double newXP) {
-        this.xp += newXP;
+        xp += newXP;
     }
 
     @Override
     public void setXP(double newXP) {
-        this.xp = newXP;
+        xp = newXP;
     }
 
     @Override
@@ -88,28 +44,18 @@ public class Soul implements ISoul {
     }
 
     @Override
-    public long getLastTalk() {
-        return lastTalk;
-    }
-
-    @Override
-    public void setLastTalk(long newLastTalk) {
-        this.lastTalk = newLastTalk;
-    }
-
-    @Override
     public void setPersonalityName(String personalityName) {
         this.personalityName = personalityName;
     }
 
     @Override
     public void setKillCount(int newKillCount) {
-        this.killCount = newKillCount;
+        killCount = newKillCount;
     }
 
     @Override
     public void setHitCount(int newHitCount) {
-        this.hitCount = newHitCount;
+        hitCount = newHitCount;
     }
 
     @Override
@@ -117,13 +63,39 @@ public class Soul implements ISoul {
         this.useCount = useCount;
     }
 
+    /*
+
+    Defaults from here on. Override as needed
+
+    */
+
     @Override
-    public int getStrength() {
-        return 0;
+    public boolean isAsleep() {
+        return false; //Never sleeps
     }
 
     @Override
-    public void setStrength(int strength) {
-        this.strength = strength;
+    public void setSleeping(boolean sleeping) {
+        //Never sleeps
+    }
+
+    @Override
+    public boolean isQuieted() {
+        return true; //Personality doesn't exist
+    }
+
+    @Override
+    public void setQuieted(boolean quieted) {
+        //Personality doesn't exist
+    }
+
+    @Override
+    public long getLastTalk() {
+        return 0; //Doesn't talk.
+    }
+
+    @Override
+    public void setLastTalk(long newLastTalk) {
+        //Doesn't talk.
     }
 }

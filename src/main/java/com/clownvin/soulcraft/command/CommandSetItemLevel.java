@@ -1,7 +1,7 @@
 package com.clownvin.soulcraft.command;
 
 import com.clownvin.soulcraft.SoulCraft;
-import com.clownvin.soulcraft.config.SoulCraftConfig;
+import com.clownvin.soulcraft.config.SCConfig;
 import com.clownvin.soulcraft.soul.ISoul;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
@@ -34,13 +34,13 @@ public class CommandSetItemLevel extends CommandBase {
             throw new WrongUsageException(getUsage(sender), new Object[0]);
         try {
             int level = Integer.parseInt(args[0]);
-            if (level < 0 || level > SoulCraftConfig.general.maxLevel)
-                throw new WrongUsageException("commands.setitemlevel.invalid_level_number", new Object[]{SoulCraftConfig.general.maxLevel});
+            if (level < 0 || level > SCConfig.general.maxLevel)
+                throw new WrongUsageException("commands.setitemlevel.invalid_level_number", new Object[]{SCConfig.general.maxLevel});
             ItemStack heldItem = player.getHeldItemMainhand();
             ISoul soul = ISoul.getSoul(heldItem);
             if (soul == null)
                 throw new WrongUsageException("commands.mainhand_item_soulless", new Object[0]);
-            SoulCraft.setExp(player, heldItem, soul, ISoul.xpRequiredForLevel(level) + 0.5f); //+0.5f because some levels have rounding underflows for "next level xp"
+            SoulCraft.setExp(player, heldItem, soul, ISoul.xpRequiredForLevel(level, SCConfig.souls.items.levelXPModifier) + 0.5f); //+0.5f because some levels have rounding underflows for "next level xp"
             notifyCommandListener(sender, this, "commands.setitemlevel.success", new Object[]{heldItem.getDisplayName(), level});
         } catch (NumberFormatException e) {
             throw new WrongUsageException("commands.setitemlevel.invalid_level_number", new Object[0]);

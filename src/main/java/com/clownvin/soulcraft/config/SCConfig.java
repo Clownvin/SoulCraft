@@ -18,7 +18,7 @@ import java.io.IOException;
 
 @Config(modid = SoulCraft.MOD_ID)
 @Config.LangKey("soulcraft.config.title")
-public class SoulCraftConfig {
+public class SCConfig {
 
     @Config.Ignore
     public static final int JUST_UNIQUES = 0;
@@ -26,7 +26,7 @@ public class SoulCraftConfig {
     public static final int JUST_BOOKS = 2;
 
     @Config.Ignore
-    public static final double DEFAULT_XP_MODIFIER = 1.0;
+    public static final double DEFAULT_XP_MODIFIER = 2.0;
     @Config.Ignore
     public static final double DEFAULT_EFFECTIVENESS = 0.032;
     @Config.Ignore
@@ -55,6 +55,7 @@ public class SoulCraftConfig {
                     "</recipe>\n" +
                     "\n</enderio:recipes>\n";
     public static General general = new General();
+    public static SoulConfigs souls = new SoulConfigs();
     public static Loot loot = new Loot();
     public static Personalities personalities = new Personalities();
 
@@ -94,25 +95,24 @@ public class SoulCraftConfig {
         }
     }
 
+    public static class SoulConfigs {
+        public PlayerConfig players = new PlayerConfig();
+        public MobConfig mobs = new MobConfig();
+        public AnimalConfig animals = new AnimalConfig();
+        public ItemConfig items = new ItemConfig();
+    }
+
     public static class General {
-        @Config.Name("Level XP Modifier (Larger is Slower)")
-        @Config.Comment("Changes how much XP is required for each level.\n0.05 is the min, and would be very fast leveling. 100 is the max, and would take forever to level.\nThe way this number is used is for scaling level xp amounts, as in this: actualXpToLevel = xpToLevel * levelXPModifier")
-        @Config.RangeDouble(min = 0.05, max = 100.0)
-        public double levelExpModifier = DEFAULT_XP_MODIFIER;
-        @Config.Name("Effectiveness Per Level (Tool)")
-        @Config.Comment("Changes how much faster the tool mines/chops/digs per level. " + DEFAULT_EFFECTIVENESS + " (Roughly 3%) is the default.")
-        @Config.RangeDouble(min = 0.0, max = 10.0)
-        public double toolEffectivenessPerLevel = DEFAULT_EFFECTIVENESS;
-        @Config.Name("Effectiveness Per Level (Weapon)")
-        @Config.Comment("Changes how large the damage increase per level is.  " + DEFAULT_EFFECTIVENESS + " (Roughly 3%) is the default.")
-        @Config.RangeDouble(min = 0.0, max = 10.0)
-        public double weaponEffectivenessPerLevel = DEFAULT_EFFECTIVENESS;
-        @Config.Name("Effectiveness Per Level (Armor)")
-        @Config.Comment("Changes how much damage reduction you gain per level.  " + DEFAULT_ARMOR_EFFECTIVENESS + " is the default.\nThe default will reach 80% armor reduction around level 14.\nThis number is then divided by 4, since you can wear 4 pieces of armor.\nBecause of math, no matter what number you pick, you'll never exceed 100% damage reduction, ever.")
-        @Config.RangeDouble(min = 0.0, max = 10.0)
-        public double armorEffectivenessPerLEvel = DEFAULT_ARMOR_EFFECTIVENESS;
+        @Config.Name("Global Mining Speed Modifier")
+        @Config.Comment("Changes the global mining speed. Can be used to nerf or buff.")
+        @Config.RangeDouble(min = 0.05, max = 20)
+        public double globalMiningSpeedModifier = 0.75D; //Default 25% slower.
+        @Config.Name("Global Damage Modifier")
+        @Config.Comment("Multiplied to all forms of damage.")
+        @Config.RangeDouble(min = 0.05, max = 20)
+        public double globalDamageModifier = 1.25D; //Default 25% more.
         @Config.Name("XP Multiplier (Kill)")
-        @Config.Comment("Changes how much XP each kill gives.")
+        @Config.Comment("Changes how much soul XP each kill gives.")
         @Config.RangeDouble(min = 0.0, max = 300.0)
         public double killXPMultiplier = 3.0;
         @Config.Name("Dynamic XP (Kill)")
@@ -126,16 +126,16 @@ public class SoulCraftConfig {
         @Config.Comment("If true, and not Mending-Style XP Handling, additional block break XP will scale with block hardness.\nIf false and not Vanilla XP style, block break XP will always be 1 * blockXPMultiplier")
         public boolean dynamicBlockXP = true;
         @Config.Name("Allow Damage/Efficiency/Protection Enchantments")
-        @Config.Comment("Changes whether the Soul enchantments are incompatible with vanilla damage/efficiency enchantments, like sharpness. Protection enchantments are also incompatible with Souls, for armor.")
+        @Config.Comment("Changes whether the ItemSoul enchantments are incompatible with vanilla damage/efficiency enchantments, like sharpness. Protection enchantments are also incompatible with Souls, for armor.")
         public boolean allowDamageEnchantments = false;
         @Config.Name("Max Level")
         @Config.Comment("Sets the max level cap.")
-        @Config.RangeInt(min = 0, max = 999999)
-        public int maxLevel = 999999;
+        @Config.RangeInt(min = 0, max = 999_999)
+        public int maxLevel = 999_999;
         @Config.Name("XP Handling Style")
-        @Config.Comment("Determines How XP is Gained. \n0 - Mending-Style: ILiving works like mending, absorbing XP Orbs\n1 - Original: Gain XP on breaking blocks with tools or killing mobs, \n2 - Original with Orbs: Like original, but breaking blocks/killing drops XP orbs just for living enchantments.")
+        @Config.Comment("Determines How XP is Gained. \n0 - Mending-Style: Item souls gain XP like mending, absorbing XP Orbs\n1 - Original: Gain XP on breaking blocks with tools or killing mobs, \n2 - Original with Orbs: Like original, but breaking blocks/killing drops XP orbs just for Souls.")
         @Config.RangeInt(min = 0, max = 2)
-        public int xpStyle = 2;
+        public int xpStyle = 1;
         @Config.Name("XP Volume")
         @Config.Comment("Changes how loud the XP added by this mod is.")
         @Config.RangeDouble(min = 0.0, max = 200.0)
@@ -149,13 +149,81 @@ public class SoulCraftConfig {
         @Config.Name("XP Function")
         @Config.Comment("Change the whole underlying XP function.\nOptions: 0 = D&D (Original), 1 = Gen 1 (From Pokemon).\nBoth reach level 14 around the same XP count.\nGen 1 has a much steeper curve after 26, but starts out faster.")
         @Config.RangeInt(min = 0, max = 1)
-        public int xpFunction = 1;
+        public int xpFunction = 0;
         @Config.Name("Effectiveness Affects All Blocks")
         @Config.Comment("Changes whether or not Effectiveness affects non-tool-effective blocks. (Ex. Pickaxe vs. Dirt would have increased speed)")
         public boolean effectivenessAffectsAllBlocks = false;
         @Config.Name("Show Ingame Update Notifications")
         @Config.Comment("Changes whether or not the mod will alert you ingame to new updates for your version.")
         public boolean showUpdateNotifications = true;
+    }
+
+    public static class ItemConfig {
+        @Config.Name("Faint Soul to Soul XP Check")
+        @Config.Comment("Changes the odds per XP gain of a Faint Soul becoming a regular Soul, as in the equation: (random(0, 1) * xpCheck) < xpGained")
+        @Config.RangeDouble(min = 1, max = 1_000_000)
+        public double xpCheck = 1500;
+        @Config.Name("Level XP Modifier (Larger is Slower)")
+        @Config.Comment("Changes how much XP is required for each level.\n0.05 is the min, and would be very fast leveling. 100 is the max, and would take forever to level.\nThe way this number is used is for scaling level xp amounts, as in this: actualXpToLevel = xpToLevel * levelXPModifier")
+        @Config.RangeDouble(min = 0.05, max = 100.0)
+        public double levelXPModifier = DEFAULT_XP_MODIFIER;
+        @Config.Name("Effectiveness Per Level (Blocks)")
+        @Config.Comment("Changes how much faster the tool mines/chops/digs per level. " + DEFAULT_EFFECTIVENESS + " (Roughly 3%) is the default.")
+        @Config.RangeDouble(min = 0.0, max = 10.0)
+        public double toolEffectivenessPerLevel = DEFAULT_EFFECTIVENESS;
+        @Config.Name("Effectiveness Per Level (Damage)")
+        @Config.Comment("Changes how large the damage increase per level is.  " + DEFAULT_EFFECTIVENESS + " (Roughly 3%) is the default.")
+        @Config.RangeDouble(min = 0.0, max = 10.0)
+        public double weaponEffectivenessPerLevel = DEFAULT_EFFECTIVENESS;
+        @Config.Name("Effectiveness Per Level (Armor)")
+        @Config.Comment("Changes how much damage reduction your items give you per level.  " + DEFAULT_ARMOR_EFFECTIVENESS + " is the default.\nThe default will reach 80% armor reduction around level 14 (assuming 4 level 14 armor pieces worn).\nThis number is then divided by 4.")
+        @Config.RangeDouble(min = 0.0, max = 10.0)
+        public double armorEffectivenessPerLevel = .25D;
+    }
+
+    public static class PlayerConfig {
+        @Config.Name("Level XP Modifier (Larger is Slower)")
+        @Config.Comment("Changes how much XP is required for each level.\n0.05 is the min, and would be very fast leveling. 100 is the max, and would take forever to level.\nThe way this number is used is for scaling level xp amounts, as in this: actualXpToLevel = xpToLevel * levelXPModifier")
+        @Config.RangeDouble(min = 0.05, max = 100.0)
+        public double levelXPModifier = DEFAULT_XP_MODIFIER;
+        @Config.Name("Effectiveness Per Level (Blocks)")
+        @Config.Comment("Changes how much faster the player mines/chops/digs per level. " + DEFAULT_EFFECTIVENESS + " (Roughly 3%) is the default.")
+        @Config.RangeDouble(min = 0.0, max = 10.0)
+        public double toolEffectivenessPerLevel = DEFAULT_EFFECTIVENESS;
+        @Config.Name("Effectiveness Per Level (Damage)")
+        @Config.Comment("Changes how much more damage you do per level.  " + DEFAULT_EFFECTIVENESS + " (Roughly 3%) is the default.")
+        @Config.RangeDouble(min = 0.0, max = 10.0)
+        public double weaponEffectivenessPerLevel = DEFAULT_EFFECTIVENESS;
+        @Config.Name("Effectiveness Per Level (Armor)")
+        @Config.Comment("Changes how much damage reduction you gain per level.  " + DEFAULT_ARMOR_EFFECTIVENESS + " is the default.\nThe default will reach 80% armor reduction around level 14.")
+        @Config.RangeDouble(min = 0.0, max = 10.0)
+        public double armorEffectivenessPerLevel = 0.083D;
+    }
+
+    public static class MobConfig {
+        @Config.Name("Level XP Modifier (Larger is Slower)")
+        @Config.Comment("Changes how much XP is required for each level.\n0.05 is the min, and would be very fast leveling. 100 is the max, and would take forever to level.\nThe way this number is used is for scaling level xp amounts, as in this: actualXpToLevel = xpToLevel * levelXPModifier")
+        @Config.RangeDouble(min = 0.05, max = 100.0)
+        public double levelXPModifier = DEFAULT_XP_MODIFIER;
+        @Config.Name("Effectiveness Per Level (Damage)")
+        @Config.Comment("Changes how much more damage mobs do per level.  " + DEFAULT_EFFECTIVENESS + " (Roughly 3%) is the default.")
+        @Config.RangeDouble(min = 0.0, max = 10.0)
+        public double weaponEffectivenessPerLevel = DEFAULT_EFFECTIVENESS;
+        @Config.Name("Effectiveness Per Level (Armor)")
+        @Config.Comment("Changes how much damage reduction mobs gain per level.  " + DEFAULT_ARMOR_EFFECTIVENESS + " is the default.\nThe default will reach 80% armor reduction around level 14.")
+        @Config.RangeDouble(min = 0.0, max = 10.0)
+        public double armorEffectivenessPerLevel = 0.083D;
+    }
+
+    public static class AnimalConfig {
+        @Config.Name("Level XP Modifier (Larger is Slower)")
+        @Config.Comment("Changes how much XP is required for each level.\n0.05 is the min, and would be very fast leveling. 100 is the max, and would take forever to level.\nThe way this number is used is for scaling level xp amounts, as in this: actualXpToLevel = xpToLevel * levelXPModifier")
+        @Config.RangeDouble(min = 0.05, max = 100.0)
+        public double levelXPModifier = DEFAULT_XP_MODIFIER;
+        @Config.Name("Effectiveness Per Level (Armor)")
+        @Config.Comment("Changes how much damage reduction animals gain per level.  " + DEFAULT_ARMOR_EFFECTIVENESS + " is the default.\nThe default will reach 80% armor reduction around level 14.")
+        @Config.RangeDouble(min = 0.0, max = 10.0)
+        public double armorEffectivenessPerLevel = DEFAULT_ARMOR_EFFECTIVENESS;
     }
 
     public static class Loot {
@@ -168,8 +236,8 @@ public class SoulCraftConfig {
         public int fishingLootType = 1;
         @Config.Name("Fishing Loot Chance")
         @Config.Comment("Changes chance of getting SoulCraft loot from fishing, 1 in [value]. Default is 1 in 750.\nRequires minecraft restart to take affect.")
-        @Config.RangeInt(min = 1, max = 10000)
-        public int fishingLootChance = 1000;
+        @Config.RangeInt(min = 1, max = 10_000)
+        public int fishingLootChance = 1_000;
         @Config.Name("Chest Loot")
         @Config.Comment("Changes whether spawned chests (dungeons, blacksmith, etc) can spawn SoulCraft loot.\nRequires minecraft restart to take affect.")
         public boolean chestLoot = true;
@@ -179,7 +247,7 @@ public class SoulCraftConfig {
         public int chestLootType = 1;
         @Config.Name("Chest Loot Chance")
         @Config.Comment("Changes chance of getting SoulCraft loot from chests, 1 in [value]. Default is 1 in 3.\nRequires minecraft restart to take affect.")
-        @Config.RangeInt(min = 1, max = 10000)
+        @Config.RangeInt(min = 1, max = 10_000)
         public int chestLootChance = 9;
     }
 
@@ -192,8 +260,8 @@ public class SoulCraftConfig {
         public boolean showPersonalities = true;
         @Config.Name("Minimum Dialogue Delay (MS)")
         @Config.Comment("Changes the minimum delay between (in Milliseconds) times the soul will talk")
-        @Config.RangeInt(min = 0, max = 900000)
-        public int minimumDialogueDelay = 9000;
+        @Config.RangeInt(min = 0, max = 900_000)
+        public int minimumDialogueDelay = 9_000;
     }
 
 }

@@ -1,7 +1,9 @@
 package com.clownvin.soulcraft.soul;
 
 import com.clownvin.soulcraft.SoulCraft;
+import com.clownvin.soulcraft.config.SCConfig;
 import net.minecraft.enchantment.Enchantment;
+import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 
 public class EnchantmentWrapper implements ISoul {
@@ -33,16 +35,6 @@ public class EnchantmentWrapper implements ISoul {
     }
 
     @Override
-    public boolean doesExist() {
-        return true;
-    }
-
-    @Override
-    public void setExists(boolean exists) {
-        return;
-    }
-
-    @Override
     public double getXP() {
         return tag.getDouble(XP);
     }
@@ -55,6 +47,26 @@ public class EnchantmentWrapper implements ISoul {
     @Override
     public void setXP(double newXP) {
         tag.setDouble(XP, newXP);
+    }
+
+    @Override
+    public double getLevelXPMod() {
+        return SCConfig.souls.items.levelXPModifier;
+    }
+
+    @Override
+    public double getToolEffectivenessMod() {
+        return SCConfig.souls.items.toolEffectivenessPerLevel;
+    }
+
+    @Override
+    public double getWeaponEffectivenessMod() {
+        return SCConfig.souls.items.weaponEffectivenessPerLevel;
+    }
+
+    @Override
+    public double getArmorEffectivenessMod() {
+        return SCConfig.souls.items.armorEffectivenessPerLevel;
     }
 
     @Override

@@ -1,8 +1,11 @@
 #Enchantment
 enchantment.faint_soul=Faint Soul
 enchantment.soul=Soul
+#Blocks
+tile.soulbell.name=Soulbell
 #Enchantment Descriptions description
-enchantment.livingenchantment.enchantment.living.desc=Gives life to the enchanted item, enabling it to grow stronger with use!
+enchantment.soulcraft.enchantment.faint_soul.desc=Gives life to the enchanted item, enabling it to grow stronger with use!
+enchantment.soulcraft.enchantment.soul.desc=Gives life to the enchanted item, enabling it to grow stronger with use!
 #Commands
 commands.mainhand_item_no_soul=To use this command, you must have a Living enchanted item held in your main hand.
 commands.invalid_xp_number=XP must be a non-negative number. It can be a decimal number.
@@ -27,6 +30,9 @@ commands.unquietitem.usage=/unquietitem
 commands.unquietitem.success="%s" is now able to talk again.
 commands.wakeupitem.usage=/wakeupitem
 commands.wakeupitem.success="%s" is now awake.
+commands.mysoul.usage=/mysoul
+commands.mysoul.soulless=Woops! You have no soul!
+commands.mysoul.success=Your soul is level %s, having %s XP. You have killed %s enemies, been hit %s times, and broken %s blocks. You currently have a damage modifier of %s, armor modifier of %s, and break speed modifier of %s.
 #Other text
 tooltip.things_killed=%s Things Killed
 tooltip.blocks_pickaxed=%s Blocks Picked
@@ -36,13 +42,12 @@ tooltip.blocks_hoed=%s Blocks Hoed
 tooltip.blocks_tooled=%s Times Used
 tooltip.hits_taken=%s Hits Taken
 tooltip.personality=Personality: %s
-tooltip.currently_worn=Currently worn:
+tooltip.current_damage_reduction=Current Damage Reduction:
 tooltip.damage_reduction=%s Damage Reduction
-#Attack Damage as it appears in your minecraft language
-tooltip.attack_damage=Attack Damage
 tooltip.lvl=Lvl: %s
 tooltip.exp=XP: %s
 tooltip.sleeping=Sleeping
 tooltip.quieted=Quieted
 text.new_update_notification=A new %s is available for %s, version %s
 text.soul_gained_strength="%s" has gained new strength!
+text.soul_levelup=Your soul has leveled up! It is now level %s!

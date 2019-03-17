@@ -40,7 +40,7 @@ public class CommandAddItemXP extends CommandBase {
             ISoul soul = ISoul.getSoul(heldItem);
             if (soul == null)
                 throw new WrongUsageException("commands.mainhand_item_soulless", new Object[0]);
-            SoulCraft.addExp(player, heldItem, soul, xp);
+            SoulCraft.addXPToItem(player, heldItem, soul, xp, true);
             notifyCommandListener(sender, this, "commands.additemxp.success", new Object[]{xp, heldItem.getDisplayName()});
         } catch (NumberFormatException e) {
             throw new WrongUsageException("commands.livingenchantment.invalid_xp_number", new Object[0]);

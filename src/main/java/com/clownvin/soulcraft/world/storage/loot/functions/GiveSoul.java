@@ -1,7 +1,7 @@
 package com.clownvin.soulcraft.world.storage.loot.functions;
 
 import com.clownvin.soulcraft.SoulCraft;
-import com.clownvin.soulcraft.config.SoulCraftConfig;
+import com.clownvin.soulcraft.config.SCConfig;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
@@ -51,7 +51,7 @@ public class GiveSoul extends LootFunction {
             stack.setStackDisplayName(SHOVEL_NAMES[rand.nextInt(SHOVEL_NAMES.length)]);
         if (stack.getItem() instanceof ItemBow)
             stack.setStackDisplayName(BOW_NAMES[rand.nextInt(BOW_NAMES.length)]);
-        if (stack.getItem() instanceof ItemHoe && SoulCraftConfig.general.hoeNames)
+        if (stack.getItem() instanceof ItemHoe && SCConfig.general.hoeNames)
             stack.setStackDisplayName(HOE_NAMES[rand.nextInt(HOE_NAMES.length)]);
         SoulCraft.resetItem(stack);
         return stack;
